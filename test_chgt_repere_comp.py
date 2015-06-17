@@ -18,7 +18,7 @@ from notes_compacite import *
 #----------------------------------------------------------
 # Importation de l'image
 
-img0 = cv2.imread('images/partition8.jpg',0)
+img0 = cv2.imread('images/partition13.jpg',0)
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -174,6 +174,9 @@ img62 = union(img52,img53,img54,img55,img56,img57,img58,img59,img60)
 img5 = soustraction_img(cimg,img62)
 img5 = soustraction_img(img5,img61)
 
+img5 = erode(img5,sedisk(1))
+plt.imshow(img5)
+plt.show()
 
 #labellisation
 img5a = inverse_0_1(img5)
@@ -188,12 +191,12 @@ tab = calcule_perimetres(img6,tab)
 comp = calcule_compacite(tab)
 (bons_points,img7) = colorie_bons(img6,comp)
 
-v7 = extraie_pixels(v6)
-v8 = bv_collee_notes(v7,bons_points)
-v9 = suppr_points_inutiles(v8)
-
+#v7 = extraie_pixels(v6)
+v8 = bv_collee_notes(v6,bons_points,e0)
+#v9 = suppr_points_inutiles(v8)
+print v8
 trace_verticales_liste(v6)
 tracer_droite_hori_liste(tab2,img7)
-affiche_points(v9)
+#affiche_points(v9)
 plt.imshow(neg(img7))
 plt.show()

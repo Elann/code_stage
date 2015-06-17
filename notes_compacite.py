@@ -8,9 +8,21 @@
 
 import numpy as np
 from matplotlib import pylab as plt
+import matplotlib.pyplot as plt2
 from math import *
 
 from fonctions_annexes import *
+
+
+#----------------------------------------------------------
+# Variables globales empiriques
+
+#Valeur minimale du critère de compacité acceptée
+seuil_comp = 0.7
+#Distance entre la note et l'extrémité de la barre verticale
+dist_note_barre = 5
+#Aire minimale acceptée pour être une noire
+aire = 70
 
 #----------------------------------------------------------
 # Fonctions
@@ -23,7 +35,7 @@ def calcule_aires(img):
 				co = img[i][j]
 				a[0][co] = a[0][co] + 1
 	for i in range(a.shape[1]):
-		if a[0][i] < 30:
+		if a[0][i] < aire:
 			a[0][i] = 0
 	return a
 
@@ -51,7 +63,7 @@ def colorie_bons(img,tab):
 	for i in range(img.shape[0]):
 		for j in range(img.shape[1]):
 			co = img[i][j]
-			if tab[co] > 0.6:
+			if tab[co] > seuil_comp:
 				img[i][j] = 255
 				l.append((i,j))
 				#plt.plot(j,i,'ro')
@@ -64,6 +76,33 @@ def extrait_pixels(liste):
 			l.append((i,elt[2]))
 	return l
 
+def existe_noire(i,note,j,ecart,place):
+	rep = 0
+	if abs(i - note) <= dist_note_barre:
+		rep = i
+		if place == 'b':
+			c2 = plt2.Circle(((2*j-ecart)/2,i),3*ecart/4,color='red')
+			plt2.gcf().gca().add_artist(c2)
+		else:
+			c2 = plt2.Circle(((2*j+ecart)/2,i),3*ecart/4,color='red')
+			plt2.gcf().gca().add_artist(c2)
+	return rep
+	
+def bv_collee_notes(bv,note,ecart):
+	for elt in bv:
+		for elt2 in note:
+			if (elt[2] == elt2[1]) and (elt2[0] < elt[1]) and (elt2[0] > elt[0]):
+				if len(elt) < 4:
+					bas = existe_noire(elt[1],elt2[0],elt[2],ecart,'b')
+					haut = existe_noire(elt[0],elt2[0],elt[2],ecart,'h')
+					if bas !=0:
+						elt.append(bas)
+					elif haut != 0:
+						elt.append(haut)
+	return bv
+	
+
+"""
 #Comparaison brutale, à voir pour faire mieux
 def bv_collee_notes(bv,note):
 	l = []
@@ -78,21 +117,21 @@ def suppr_points_inutiles(liste):
 	l2 = []
 	l3 = []
 	l = sorted(liste,key=lambda colonnes: colonnes[0])
-	for i in range(len(l)-1):
-		if (l[i][1] <= l[i+1][1]+1) and (l[i][1] >= l[i+1][1]-1) and (l[i][0] <= l[i+1][0]+1) and (l[i][0] >= l[i+1][0]-1):
+	for i in range(1,len(l)):
+		if (l[i-1][1] <= l[i][1]+1) and (l[i-1][1] >= l[i][1]-1) and (l[i-1][0] <= l[i][0]+5) and (l[i-1][0] >= l[i][0]-5):
 			continue
 		else:
 			l2.append(l[i])
-	if (l[len(l)-1][1] > l2[len(l2)-1][1]+1) or (l[len(l)-1][1] < l2[len(l2)-1][1]-1) or (l[len(l)-1][0] > l2[len(l2)-1][0]+1) or (l[len(l)-1][0] < l2[len(l2)-1][0]-1):
-		l2.append(l[len(l)-1])
+	if (l[0][1] > l2[0][1]+1) or (l[0][1] < l2[0][1]-1) or (l[0][0] > l2[0][0]+5) or (l[0][0] < l2[0][0]-5):
+		l2.append(l[0])
 	
 	g = sorted(l2,key=lambda colonnes: colonnes[1])
-	for i in range(len(g)-1):
-		if (g[i][1] <= g[i+1][1]+1) and (g[i][1] >= g[i+1][1]-1) and (g[i][0] <= g[i+1][0]+1) and (g[i][0] >= g[i+1][0]-1):
+	for i in range(1,len(g)):
+		if (g[i-1][1] <= g[i][1]+1) and (g[i-1][1] >= g[i][1]-1) and (g[i-1][0] <= g[i][0]+5) and (g[i-1][0] >= g[i][0]-5):
 			continue
 		else:
 			l3.append(g[i])
-	if (g[len(g)-1][1] > l3[len(l3)-1][1]+1) or (g[len(g)-1][1] < l3[len(l3)-1][1]-1) or (g[len(g)-1][0] > l3[len(l3)-2][0]+1) or (g[len(g)-1][0] < l3[len(l3)-2][0]-1):
-		l3.append(g[len(g)-1])
+	if (g[0][1] > l3[0][1]+1) or (g[0][1] < l3[0][1]-1) or (g[0][0] > l3[0][0]+5) or (g[0][0] < l3[0][0]-5):
+		l3.append(g[0])
 		
-	return l3
+	return l3"""

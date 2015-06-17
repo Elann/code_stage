@@ -93,6 +93,7 @@ def groupe_deux_points_liste_de_liste(liste):
 #on supprime les barres qui sont trop proches (en tenant compte de leur ordonnée...
 def supprime_barres_trop_proches(liste):
 	l = []
+	l2 = []
 	g = sorted(liste,key=lambda colonnes: colonnes[0])
 	if len(g) >= 2:
 		for i in range(len(g)-1):
@@ -100,9 +101,19 @@ def supprime_barres_trop_proches(liste):
 				continue
 			else:
 				l.append(g[i])
-		if (g[len(g)-2][2] > g[len(g)-1][2]+entre_bv) or (g[len(g)-2][2] < liste[len(g)-1][2]-entre_bv):
+		if (g[len(g)-1][2] > l[len(l)-1][2]+entre_bv) or (g[len(g)-1][2] < l[len(l)-1][2]-entre_bv):
 			l.append(g[len(g)-1])
-	return l
+	
+	h = sorted(l,key=lambda colonnes: colonnes[1])
+	if len(h) >= 2:
+		for i in range(1,len(h)):
+			if (h[i-1][2] <= h[i][2]+entre_bv) and (h[i-1][2] >= h[i][2]-entre_bv):
+				continue
+			else:
+				l2.append(h[i])
+		if (h[0][2] > l2[0][2]+entre_bv) or (h[0][2] < l2[0][2]-entre_bv):
+			l2.append(h[0])
+	return l2
 
 #tracé des droites verticales
 def trace_verticales(tupl):
