@@ -18,7 +18,7 @@ from notes_compacite import *
 #----------------------------------------------------------
 # Importation de l'image
 
-img0 = cv2.imread('images/partition13.jpg',0)
+img0 = cv2.imread('images/partition2.jpg',0)
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -178,12 +178,14 @@ img5 = erode(img5,sedisk(1))
 plt.imshow(img5)
 plt.show()
 
-#labellisation
+#Fond : 0, motifs : 1
 img5a = inverse_0_1(img5)
+#labellisation
 img6 = label(img5a)
 
 plt.imshow(img6)
 plt.show()
+
 
 tab = calcule_aires(img6)
 tab = calcule_perimetres(img6,tab)
@@ -191,12 +193,16 @@ tab = calcule_perimetres(img6,tab)
 comp = calcule_compacite(tab)
 (bons_points,img7) = colorie_bons(img6,comp)
 
-#v7 = extraie_pixels(v6)
+#on vérifie que les barres verticales sont collées à une note
 v8 = bv_collee_notes(v6,bons_points,e0)
-#v9 = suppr_points_inutiles(v8)
-print v8
+#Listes de la forme [ord1,ord2,ab,ord_note ou 0]
+#0 -> barre de mesure ou blanches ou bruit
+v9 = liste_listes_note(v8)
+
+print v9
+
 trace_verticales_liste(v6)
 tracer_droite_hori_liste(tab2,img7)
-#affiche_points(v9)
-plt.imshow(neg(img7))
+img7 = inverse_0_1(img7)
+plt.imshow(img7)
 plt.show()
