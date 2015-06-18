@@ -186,23 +186,38 @@ img6 = label(img5a)
 plt.imshow(img6)
 plt.show()
 
-
 tab = calcule_aires(img6)
 tab = calcule_perimetres(img6,tab)
 
 comp = calcule_compacite(tab)
-(bons_points,img7) = colorie_bons(img6,comp)
+(n1,img7) = colorie_bons(img6,comp)
+
+plt.imshow(img7)
+plt.show()
+
 
 #on vérifie que les barres verticales sont collées à une note
-v8 = bv_collee_notes(v6,bons_points,e0)
+v8 = bv_collee_notes(v6,n1,e0)
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0]
 #0 -> barre de mesure ou blanches ou bruit
 v9 = liste_listes_note(v8)
 
-print v9
+#on passe aux croches
+
+#on retire les notes (les croches sont rectangulaires ou ellipsoïdales)
+img8 = enleve_notes(cimg,n1)
+img8 = erode(img8,sedisk(1))
+
+n2 = recupere_points(img8)
+(v10,img9) = bv_collee_croche(v9,n2,e0,img8,1)
+
+n4 = recupere_points(img9)
+(n5,img10) = bv_collee_croche2(v10,n4,e0,img9,2)
+print n5
+
+img71 = inverse_0_1(img7)
 
 trace_verticales_liste(v6)
-tracer_droite_hori_liste(tab2,img7)
-img7 = inverse_0_1(img7)
-plt.imshow(img7)
+tracer_droite_hori_liste(tab2,img2)
+plt.imshow(img71)
 plt.show()
