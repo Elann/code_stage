@@ -18,7 +18,10 @@ from notes_compacite import *
 #----------------------------------------------------------
 # Importation de l'image
 
-img0 = cv2.imread('images/partition2.jpg',0)
+img0 = cv2.imread('images/partition15.jpg',0)
+
+#Nombre de croches
+nbr_croches = 1
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -199,7 +202,6 @@ plt.show()
 #on vérifie que les barres verticales sont collées à une note
 v8 = bv_collee_notes(v6,n1,e0)
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0]
-#0 -> barre de mesure ou blanches ou bruit
 v9 = liste_listes_note(v8)
 
 #on passe aux croches
@@ -208,14 +210,21 @@ v9 = liste_listes_note(v8)
 img8 = enleve_notes(cimg,n1)
 img8 = erode(img8,sedisk(1))
 
+#on récupère les pixels noirs de l'image
 n2 = recupere_points(img8)
-(v10,img9) = bv_collee_croche(v9,n2,e0,img8,1)
-
-n4 = recupere_points(img9)
-(n5,img10) = bv_collee_croche2(v10,n4,e0,img9,2)
-print n5
+#on trouve les croches simples
+v10 = bv_collee_croche(v9,n2,e0,img8,1)
+#on trouve les croches doubles/triples... 
+n3 = existe_autre_croche(img8,v10,e0,nbr_croches)
+#Listes de la forme [ord1,ord2,ab,ord_note ou 0, nbr_croches]
+n4 = liste_listes_croche(n3)
 
 img71 = inverse_0_1(img7)
+
+
+n5 = nom_notes(n4,tab2,e0,'fa')
+print n5
+print e0
 
 trace_verticales_liste(v6)
 tracer_droite_hori_liste(tab2,img2)
