@@ -404,6 +404,7 @@ def determine_note_ut(j,tab,ecart,inter_note):
 #ecart : écart moyen entre les portées
 def nom_notes(bv,tab,ecart,clef):
 	rep = ''
+	rep2 = ''
 	if ecart < 10:
 		inter_note = 2
 	elif ecart < 20:
@@ -415,14 +416,37 @@ def nom_notes(bv,tab,ecart,clef):
 		if elt[3] != 0: #si on a une note
 			if clef == 'sol':
 				rep = determine_note_sol(elt[3],tab,ecart,inter_note)
-				elt.append(rep)
-				plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
+				if elt[4] == 1:
+					rep2 = 'croche '+rep
+					elt.append(rep2)
+				elif elt[4] == 2:
+					rep2 = 'double croche '+rep
+					elt.append(rep2)
+				else:
+					elt.append(rep)
+					
 			elif clef == 'fa':
 				rep = determine_note_fa(elt[3],tab,ecart,inter_note)
-				elt.append(rep)
-				plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
+				if elt[4] == 1:
+					rep2 = 'croche '+rep
+					elt.append(rep2)
+				elif elt[4] == 2:
+					rep2 = 'double croche '+rep
+					elt.append(rep2)
+				else:
+					elt.append(rep)
+					
 			elif clef == 'ut':
 				rep = determine_note_ut(elt[3],tab,ecart,inter_note)
-				elt.append(rep)
-				plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
+				if elt[4] == 1:
+					rep2 = 'croche '+rep
+					elt.append(rep2)
+				elif elt[4] == 2:
+					rep2 = 'double croche '+rep
+					elt.append(rep2)
+				else:
+					elt.append(rep)
+					
+			#on affiche le nom de la note sous celle-ci
+			plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
 	return bv
