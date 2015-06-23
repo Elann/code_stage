@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt2
 from math import *
 
 from fonctions_annexes import *
+from reconnaissance_clef import *
 
 
 #----------------------------------------------------------
@@ -262,149 +263,161 @@ def liste_listes_croche(liste):
 #--------------------------------------------------------------
 #Noms des notes
 
+def notes_par_portees(liste,tab):
+	#on crée un tableau de la taille "nombre de portées"
+	l = []
+	for i in range(len(tab[0])):
+		l.append([])
+		
+	#on parcourt les portées
+	for i in range(len(tab[0])):
+		for j in range(len(liste)):
+			m = (liste[j][1]+liste[j][0])/2 
+			#si le milieu de la barre appartient à la portée i, on l'ajoute à la case i
+			if m >= tab[0][i] and m <= tab[4][i]:
+				l[i].append(liste[j])
+	return l
+
 #Notes pour la clef de sol
 #j est l'ordonnée de l'extrémité de la barre où se trouve la note
-def determine_note_sol(j,tab,ecart,inter_note):
+#x est le numéro de la portée (commence à 0)
+def determine_note_sol(j,tab,ecart,inter_note,x):
 	rep = ''
-	taille = len(tab[0])
-	for x in range(taille):
-		#notes sur les lignes
-		if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
-			rep = 'fa'
-		elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
-			rep = 're'
-		elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
-			rep = 'si'
-		elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
-			rep = 'sol'
-		elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
-			rep = 'mi grave'
-		#notes entre les lignes
-		elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
-			rep = 'mi'
-		elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
-			rep = 'do'
-		elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
-			rep = 'la'
-		elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
-			rep = 'fa grave'
-		#notes en-dessous des lignes
-		elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
-			rep = 're grave'
-		elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
-			rep = 'do grave'
-		elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
-			rep = 'si grave'
-		elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
-			rep = 'la grave'
-		#notes au-dessus des lignes
-		elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
-			rep = 'sol aigu'
-		elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
-			rep = 'la aigu'
-		elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
-			rep = 'si aigu'
-		elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
-			rep = 'do aigu'
+	#notes sur les lignes
+	if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
+		rep = 'fa'
+	elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
+		rep = 're'
+	elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
+		rep = 'si'
+	elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
+		rep = 'sol'
+	elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
+		rep = 'mi grave'
+	#notes entre les lignes
+	elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
+		rep = 'mi'
+	elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
+		rep = 'do'
+	elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
+		rep = 'la'
+	elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
+		rep = 'fa grave'
+	#notes en-dessous des lignes
+	elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
+		rep = 're grave'
+	elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
+		rep = 'do grave'
+	elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
+		rep = 'si grave'
+	elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
+		rep = 'la grave'
+	#notes au-dessus des lignes
+	elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
+		rep = 'sol aigu'
+	elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
+		rep = 'la aigu'
+	elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
+		rep = 'si aigu'
+	elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
+		rep = 'do aigu'
 	return rep
 
 #Notes pour le clef de fa
-def determine_note_fa(j,tab,ecart,inter_note):
+def determine_note_fa(j,tab,ecart,inter_note,x):
 	rep = ''
-	taille = len(tab[0])
-	for x in range(taille):
-		#notes sur les lignes
-		if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
-			rep = 'la aigu'
-		elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
-			rep = 'fa'
-		elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
-			rep = 're'
-		elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
-			rep = 'si'
-		elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
-			rep = 'sol'
-		#notes entre les lignes
-		elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
-			rep = 'sol aigu'
-		elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
-			rep = 'mi'
-		elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
-			rep = 'do'
-		elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
-			rep = 'la'
-		#notes en-dessous des lignes
-		elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
-			rep = 'fa grave'
-		elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
-			rep = 'mi grave'
-		elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
-			rep = 're grave'
-		elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
-			rep = 'do grave'
-		#notes au-dessus des lignes
-		elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
-			rep = 'si aigu'
-		elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
-			rep = 'do aigu'
-		elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
-			rep = 're aigu'
-		elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
-			rep = 'mi aigu'
+	#notes sur les lignes
+	if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
+		rep = 'la aigu'
+	elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
+		rep = 'fa'
+	elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
+		rep = 're'
+	elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
+		rep = 'si'
+	elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
+		rep = 'sol'
+	#notes entre les lignes
+	elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
+		rep = 'sol aigu'
+	elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
+		rep = 'mi'
+	elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
+		rep = 'do'
+	elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
+		rep = 'la'
+	#notes en-dessous des lignes
+	elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
+		rep = 'fa grave'
+	elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
+		rep = 'mi grave'
+	elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
+		rep = 're grave'
+	elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
+		rep = 'do grave'
+	#notes au-dessus des lignes
+	elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
+		rep = 'si aigu'
+	elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
+		rep = 'do aigu'
+	elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
+		rep = 're aigu'
+	elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
+		rep = 'mi aigu'
 	return rep
 
 #Notes pour le clef d'ut
-def determine_note_ut(j,tab,ecart,inter_note):
+def determine_note_ut(j,tab,ecart,inter_note,x):
 	rep = ''
-	taille = len(tab[0])
-	for x in range(taille):
-		#notes sur les lignes
-		if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
-			rep = 'sol'
-		elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
-			rep = 'mi'
-		elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
-			rep = 'do'
-		elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
-			rep = 'la'
-		elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
-			rep = 'fa grave'
-		#notes entre les lignes
-		elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
-			rep = 'fa'
-		elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
-			rep = 're'
-		elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
-			rep = 'si'
-		elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
-			rep = 'sol grave'
-		#notes en-dessous des lignes
-		elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
-			rep = 'mi grave'
-		elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
-			rep = 're grave'
-		elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
-			rep = 'do grave'
-		elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
-			rep = 'sol grave'
-		#notes au-dessus des lignes
-		elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
-			rep = 'la aigu'
-		elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
-			rep = 'si aigu'
-		elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
-			rep = 'do aigu'
-		elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
-			rep = 're aigu'
+	#notes sur les lignes
+	if j > tab[0][x]-inter_note and j < tab[0][x]+inter_note:
+		rep = 'sol'
+	elif j > tab[1][x]-inter_note and j < tab[1][x]+inter_note:
+		rep = 'mi'
+	elif j > tab[2][x]-inter_note and j < tab[2][x]+inter_note:
+		rep = 'do'
+	elif j > tab[3][x]-inter_note and j < tab[3][x]+inter_note:
+		rep = 'la'
+	elif j > tab[4][x]-inter_note and j < tab[4][x]+inter_note:
+		rep = 'fa grave'
+	#notes entre les lignes
+	elif j > (tab[0][x]+tab[1][x])/2-inter_note and j < (tab[0][x]+tab[1][x])/2+inter_note:
+		rep = 'fa'
+	elif j > (tab[1][x]+tab[2][x])/2-inter_note and j < (tab[2][x]+tab[1][x])/2+inter_note:
+		rep = 're'
+	elif j > (tab[2][x]+tab[3][x])/2-inter_note and j < (tab[3][x]+tab[2][x])/2+inter_note:
+		rep = 'si'
+	elif j > (tab[3][x]+tab[4][x])/2-inter_note and j < (tab[4][x]+tab[3][x])/2+inter_note:
+		rep = 'sol grave'
+	#notes en-dessous des lignes
+	elif j > (2*tab[4][x]+ecart)/2-inter_note and j < (2*tab[4][x]+ecart)/2+inter_note:
+		rep = 'mi grave'
+	elif j > tab[4][x]+ecart-inter_note and j < tab[4][x]+ecart+inter_note:
+		rep = 're grave'
+	elif j > (2*tab[4][x]+3*ecart)/2-inter_note and j < (2*tab[4][x]+3*ecart)/2+inter_note:
+		rep = 'do grave'
+	elif j > tab[4][x]+2*ecart-inter_note and j < tab[4][x]+2*ecart+inter_note:
+		rep = 'sol grave'
+	#notes au-dessus des lignes
+	elif j > (2*tab[0][x]-ecart)/2-inter_note and j < (2*tab[0][x]-ecart)/2+inter_note:
+		rep = 'la aigu'
+	elif j > tab[0][x]-ecart-inter_note and j < tab[0][x]-ecart+inter_note:
+		rep = 'si aigu'
+	elif j > (2*tab[0][x]-3*ecart)/2-inter_note and j < (2*tab[0][x]-3*ecart)/2+inter_note:
+		rep = 'do aigu'
+	elif j > tab[0][x]-2*ecart-inter_note and j < tab[0][x]-2*ecart+inter_note:
+		rep = 're aigu'
 	return rep
 
 
 #bv : liste des barres verticales
 #tab : ordonnées des portées
 #ecart : écart moyen entre les portées
-def nom_notes(bv,tab,ecart,clef):
+def nom_notes(bv,tab,ecart,list_img,sol,fa,ut):
 	rep = ''
 	rep2 = ''
+	
+	#détermination de l'intervalle [X-inter_note,X+internote] dans lequel se trouve la note
 	if ecart < 10:
 		inter_note = 2
 	elif ecart < 20:
@@ -412,41 +425,35 @@ def nom_notes(bv,tab,ecart,clef):
 	else:
 		inter_note = 4
 		
-	for elt in bv:
-		if elt[3] != 0: #si on a une note
-			if clef == 'sol':
-				rep = determine_note_sol(elt[3],tab,ecart,inter_note)
+	for i in range(len(bv)):
+	
+		#pour une portée, on détermine la clef
+		clef = cherche_bonne_clef(list_img[i],sol,fa,ut,tab)
+	
+		for elt in bv[i]:
+			if elt[3] != 0: #si on a une note
+		
+				#notes
+				if clef == 'sol':
+					rep = determine_note_sol(elt[3],tab,ecart,inter_note,i)
+				elif clef == 'fa':
+					rep = determine_note_fa(elt[3],tab,ecart,inter_note,i)
+				elif clef == 'ut':
+					rep = determine_note_ut(elt[3],tab,ecart,inter_note,i)
+			
+				#croches
 				if elt[4] == 1:
 					rep2 = 'croche '+rep
 					elt.append(rep2)
 				elif elt[4] == 2:
 					rep2 = 'double croche '+rep
 					elt.append(rep2)
-				else:
-					elt.append(rep)
-					
-			elif clef == 'fa':
-				rep = determine_note_fa(elt[3],tab,ecart,inter_note)
-				if elt[4] == 1:
-					rep2 = 'croche '+rep
-					elt.append(rep2)
-				elif elt[4] == 2:
-					rep2 = 'double croche '+rep
+				elif elt[4] == 3:
+					rep2 = 'triple croche '+rep
 					elt.append(rep2)
 				else:
 					elt.append(rep)
-					
-			elif clef == 'ut':
-				rep = determine_note_ut(elt[3],tab,ecart,inter_note)
-				if elt[4] == 1:
-					rep2 = 'croche '+rep
-					elt.append(rep2)
-				elif elt[4] == 2:
-					rep2 = 'double croche '+rep
-					elt.append(rep2)
-				else:
-					elt.append(rep)
-					
-			#on affiche le nom de la note sous celle-ci
-			plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
+				
+				#on affiche le nom de la note sous celle-ci
+				plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
 	return bv

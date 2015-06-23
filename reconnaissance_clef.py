@@ -3,17 +3,57 @@
 
 """Module reconnaissance de le clef"""
 
+#----------------------------------------------------------
+# Importation des librairies
+
 import cv2
+import sys
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.pyplot as plt2
 import warnings
+from math import *
 
 
+#----------------------------------------------------------
+# Fonctions
+
+def decoupe_images_en_portees(tab,img):
+	l = []
+	p = []
+	
+	#ordonnées des lignes de découpe
+	for i in range(len(tab[0])-1):
+		p.append((tab[4][i] + tab[0][i+1])/2)
+	
+	for j in range(len(p)+1):
+		if j == 0:
+			h = 0
+			b = p[j]
+		elif j == len(p):
+			b = img.shape[0]
+			h = p[j-1]
+		else:
+			b = p[j]
+			h = p[j-1]
+		
+		#on crée une image de la largeur voulue et de longueur identique à celle de l'image d'origine
+		if b-h < 0:
+			print "mauvaise détection des portées"
+			sys.exit(1)
+		img2 = np.zeros((b-h,img.shape[1]),np.uint8)
+		for x in range(img2.shape[0]):
+			for y in range(img2.shape[1]):
+				img2[x][y] = img[x+h][y]
+		l.append(img2)
+	return l
+	
+
+#on redimensionne les images de clefs pour les adapter à la partition
 def redimensionne_img(ecart,imgf,imgs,imgu):
 	h = int(round(4*ecart))
 	h2 = int(round(7*ecart))
-	bf = int(round(19*h/34))
+	bf = int(round(45*h/63))
 	bs = int(round(43*h2/103))
 	bu = int(round(69*h/106))
 	template_fa = cv2.resize(imgf,(bf,h))
@@ -22,6 +62,7 @@ def redimensionne_img(ecart,imgf,imgs,imgu):
 	return (template_fa,template_sol,template_ut)
 
 
+#les clefs détectées doivent être sur les portées
 def verifie_pertinence_clef(tab,pt,pt2):
 	j = 0
 	comp = 0
@@ -51,56 +92,50 @@ def cherche_clef(img,temp,tab):
 	if (max_loc[0] < img.shape[0]/7) and (verifie_pertinence_clef(tab,max_loc[1],max_loc[1]+h) == 1):
 		cv2.rectangle(img, max_loc, (max_loc[0] + w, max_loc[1] + h), 0, 2)
 		rep = 1
-	
 	return img,rep
 
+
 #on cherche plusieurs occurences de la clef
-def cherche_clef2(img,temp):
+def cherche_clef2(img,temp,tab):
 	rep = 0
 	w,h = temp.shape[::-1]
 	res = cv2.matchTemplate(img,temp,cv2.TM_CCOEFF_NORMED)
 	threshold = 0.6 #ce n'est pas un minimum mais plusieurs au-dessus d'un certain seuil, comment le déterminer ?
 	loc = np.where(res >= threshold)
 	for pt in zip(*loc[::-1]):
-		if pt[0] < img.shape[0]/7:
+		if pt[0] < img.shape[0]/7 and (verifie_pertinence_clef(tab,pt[1],pt[1]+h) == 1):
 			cv2.rectangle(img, pt, (pt[0] + w, pt[1] + h),0, 2)
 			rep = 1
-			
 	return img,rep
 
-"""
 
-#plusieurs occurences
-w,h = temp.shape[::-1]
-	res = cv2.matchTemplate(img,temp,cv2.TM_CCOEFF_NORMED)
-	threshold = 0.6 #ce n'est plus un minimum mais plusieurs au-dessus d'un certain seuil, comment le déterminer ?
-	loc = np.where(res >= threshold)
-	for pt in zip(*loc[::-1]):
-		cv2.rectangle(img, pt, (pt[0] + w, pt[1] + h), 255, 2)
-		
-#si on ne cherche qu'une occurence
-res = cv2.matchTemplate(img_gray,template,cv2.TM_CCOEFF_NORMED)
-min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+def cherche_bonne_clef(img,sol,fa,ut,tab):
+	rep = ''
+	
+	#on cherche la clef de sol, si on ne trouve pas, on cherche la clef de fa, si on ne trouve pas, on cherche la clef d'ut
+	img2,if_sol = cherche_clef(img,sol,tab)
+	if if_sol == 0:
+		img2,if_fa = cherche_clef(img,fa,tab)
+		if if_fa == 0:
+			img2,if_ut = cherche_clef(img,ut,tab)
+			if if_ut == 0:
+				print "mauvaise détection de la clef"
+				rep = 'fa'
+				#sys.exit(1)
+			else:
+				rep = 'ut'
+		else:
+			rep = 'fa'
+	else:
+		rep = 'sol'
+	
+	print rep
+	return rep
+	
+	
+	
+	
+	
 
-cv2.rectangle(img_rgb, max_loc, (max_loc[0] + w, max_loc[1] + h), 255, 2)
 
 
-b = 28
-img = Image.open('images/clef_fa.jpg')
-w = b/float(img.size[1])
-h = int(float(w)*float(img.size[0]))
-img = img.resize((h,b),Image.ANTIALIAS)
-
-plt.imshow(img)
-plt.show()
-
-w,h = img.size
-
-template = adaptors.PIL2Ipl(img)
-print template
-
-template = np.zeros(img.size)
-for i in range(w):
-	for j in range(h):
-		template[i][j] = img[i][j]
-"""

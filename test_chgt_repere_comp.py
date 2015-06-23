@@ -14,23 +14,31 @@ from portees_chgt_repere import *
 from fonctions_annexes import *
 from barres_verticales import *
 from notes_compacite import *
+from reconnaissance_clef import *
 
 #----------------------------------------------------------
-# Importation de l'image
+# Importation des images
 
-img0 = cv2.imread('images/partition15.jpg',0)
+img0 = cv2.imread('images/partition8.jpg')
+img0 = cv2.cvtColor(img0,cv2.COLOR_BGR2GRAY)
+
+img_fa = cv2.imread('images/clef_fa2.jpg',0)
+img_sol = cv2.imread('images/clef_sol.jpg',0)
+img_ut = cv2.imread('images/clef_ut.jpg',0)
+
+#----------------------------------------------------------
+# Variables globales empiriques
 
 #Nombre de croches
 nbr_croches = 1
 
-# si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
+
+#----------------------------------------------------------
+# Programme
 
 #empêche les warning (apparus par magie) quand on ferme la fenêtre de pyplot
 warnings.simplefilter("ignore")
 
-
-#----------------------------------------------------------
-# Programme
 
 img1 = cv2.adaptiveThreshold(img0,1,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,21,2)
 
@@ -219,13 +227,22 @@ n3 = existe_autre_croche(img8,v10,e0,nbr_croches)
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0, nbr_croches]
 n4 = liste_listes_croche(n3)
 
-img71 = inverse_0_1(img7)
+#liste de n listes, n étant le nombre de portées
+n41 = notes_par_portees(n4,tab2)
 
+#on adapte la taille des templates à celle de l'image
+fa,sol,ut = redimensionne_img(e0,img_fa,img_sol,img_ut)
 
-n5 = nom_notes(n4,tab2,e0,'fa')
+#on découpe l'image en portées pour les étudier une à une
+list_img = decoupe_images_en_portees(tab2,img0)
+
+#on trouve le nom des notes (noires, (doubles, triples) croches)
+#la fonction cherche la clef de la portée à chaque fois
+n5 = nom_notes(n41,tab2,e0,list_img,sol,fa,ut)
 print n5
-print e0
 
+#affichage
+img71 = inverse_0_1(img7)
 trace_verticales_liste(v6)
 tracer_droite_hori_liste(tab2,img2)
 plt.imshow(img71)
