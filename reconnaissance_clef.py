@@ -13,6 +13,8 @@ from matplotlib import pyplot as plt
 import matplotlib.pyplot as plt2
 import warnings
 from math import *
+#from skimage import data
+#from skimage.feature import match_template
 
 
 #----------------------------------------------------------
@@ -22,9 +24,13 @@ def decoupe_images_en_portees(tab,img):
 	l = []
 	p = []
 	
-	#ordonnées des lignes de découpe
-	for i in range(len(tab[0])-1):
-		p.append((tab[4][i] + tab[0][i+1])/2)
+	#si on a qu'une portée, on ne découpe pas
+	if len(tab[0]) == 1:
+		p.append(img.shape[0])
+	else:
+		for i in range(len(tab[0])-1):
+			#ordonnées des lignes de découpe entre les portées
+			p.append((tab[4][i] + tab[0][i+1])/2)
 	
 	for j in range(len(p)+1):
 		if j == 0:
@@ -48,6 +54,14 @@ def decoupe_images_en_portees(tab,img):
 		l.append(img2)
 	return l
 	
+def ab_premiere_note(bv,img):
+	mini = img.shape[1]
+	for elt in bv:
+		if elt[3] != 0 and elt[3] < mini:
+			mini = elt[3]
+		elif elt[5] != 0 and elt[5] < mini:
+			mini = elt[5]
+	return mini
 
 #on redimensionne les images de clefs pour les adapter à la partition
 def redimensionne_img(ecart,imgf,imgs,imgu):
@@ -80,21 +94,66 @@ def verifie_pertinence_clef(tab,pt,pt2):
 		comp = 0
 	return rep
 
-
 #on cherche une unique occurence de la clef
-def cherche_clef(img,temp,tab):
+def cherche_clef(img,temp,tab,dist):
 	rep = 0
+	ab = 0
 	w,h = temp.shape[::-1]
 	res = cv2.matchTemplate(img,temp,cv2.TM_CCOEFF_NORMED)
 	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 	
 	#les clefs sont en début de partition (à bricoler)
-	if (max_loc[0] < img.shape[0]/7) and (verifie_pertinence_clef(tab,max_loc[1],max_loc[1]+h) == 1):
+	if (max_loc[0] < dist): #and (verifie_pertinence_clef(tab,max_loc[1],max_loc[1]+h) == 1):
 		cv2.rectangle(img, max_loc, (max_loc[0] + w, max_loc[1] + h), 0, 2)
+		#plt.imshow(img)
+		#plt.show()
 		rep = 1
-	return img,rep
+		ab = max_loc[0]
+	#on renvoie l'existence de la clef et son abscisse
+	return ab,rep
 
+def cherche_bonne_clef(img,sol,fa,ut,tab,dist):
+	rep = ''
+	ab = 0
+	
+	#on cherche la clef de sol, si on ne trouve pas, on cherche la clef de fa, si on ne trouve pas, on cherche la clef d'ut
+	ab_s,if_sol = cherche_clef(img,sol,tab,dist)
+	if if_sol == 0:
+		ab_f,if_fa = cherche_clef(img,fa,tab,dist)
+		if if_fa == 0:
+			ab_u,if_ut = cherche_clef(img,ut,tab,dist)
+			if if_ut == 0:
+				print "mauvaise détection de la clef"
+				sys.exit(1)
+			else:
+				rep = 'ut'
+				ab = ab_u
+		else:
+			rep = 'fa'
+			ab = ab_f
+	else:
+		rep = 'sol'
+		ab = ab_s
+	
+	print rep,ab
+	return rep,ab
+	
+	
+"""
+#avec skimage
+def cherche_clef(img,temp,tab):
+	rep = 0
+	w,h = temp.shape[::-1]
+	
+	result = match_template(img, temp)
+	ij = np.unravel_index(np.argmax(result), result.shape)
+	x, y = ij[::-1]
+	
+	if (x < img.shape[1]/7) and (verifie_pertinence_clef(tab,y,y+h) == 1):
+		rep = 1
+	return rep
 
+#inutile à ce jour
 #on cherche plusieurs occurences de la clef
 def cherche_clef2(img,temp,tab):
 	rep = 0
@@ -107,35 +166,4 @@ def cherche_clef2(img,temp,tab):
 			cv2.rectangle(img, pt, (pt[0] + w, pt[1] + h),0, 2)
 			rep = 1
 	return img,rep
-
-
-def cherche_bonne_clef(img,sol,fa,ut,tab):
-	rep = ''
-	
-	#on cherche la clef de sol, si on ne trouve pas, on cherche la clef de fa, si on ne trouve pas, on cherche la clef d'ut
-	img2,if_sol = cherche_clef(img,sol,tab)
-	if if_sol == 0:
-		img2,if_fa = cherche_clef(img,fa,tab)
-		if if_fa == 0:
-			img2,if_ut = cherche_clef(img,ut,tab)
-			if if_ut == 0:
-				print "mauvaise détection de la clef"
-				rep = 'fa'
-				#sys.exit(1)
-			else:
-				rep = 'ut'
-		else:
-			rep = 'fa'
-	else:
-		rep = 'sol'
-	
-	print rep
-	return rep
-	
-	
-	
-	
-	
-
-
-
+"""

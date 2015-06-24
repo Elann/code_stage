@@ -19,7 +19,7 @@ from reconnaissance_clef import *
 #----------------------------------------------------------
 # Importation des images
 
-img0 = cv2.imread('images/partition8.jpg')
+img0 = cv2.imread('images/partition2.jpg')
 img0 = cv2.cvtColor(img0,cv2.COLOR_BGR2GRAY)
 
 img_fa = cv2.imread('images/clef_fa2.jpg',0)
@@ -32,6 +32,10 @@ img_ut = cv2.imread('images/clef_ut.jpg',0)
 #Nombre de croches
 nbr_croches = 1
 
+#Valeur minimale du critère de compacité acceptée
+seuil_comp = 0.7
+#Valeur minimale du critère de compacité acceptée
+seuil_comp2 = 0.6
 
 #----------------------------------------------------------
 # Programme
@@ -64,8 +68,6 @@ img8 = close(img1,seline(a,93))
 img9 = close(img1,seline(a,94))
 
 img = union(img2,img3,img4,img5,img6,img7,img8,img9)
-plt.imshow(img)
-plt.show()
 
 #Vachement long si on trace les points rouges
 l1 = trouve_noir_matrice(img)
@@ -140,6 +142,7 @@ plt.show()
 #détection des barres verticales
 #on ne garde que les barres > 3*écart entre les lignes de portée
 img3 = close(img2,seline(3*e0))
+
 plt.imshow(img3)
 plt.show()
 
@@ -163,10 +166,6 @@ cimg = cv2.medianBlur(img0,5)
 cimg = binary(cimg,100)
 #cimg = imgbooltoint(cimg) (effet nul, pourquoi ?)
 
-#trace_verticales_liste(v6)
-plt.imshow(cimg)
-plt.show()
-
 
 #on enleve les barres ~horizontales possiblement restantes
 b = 2*e0 #taille suivant les images !
@@ -186,22 +185,18 @@ img5 = soustraction_img(cimg,img62)
 img5 = soustraction_img(img5,img61)
 
 img5 = erode(img5,sedisk(1))
-plt.imshow(img5)
-plt.show()
 
 #Fond : 0, motifs : 1
 img5a = inverse_0_1(img5)
 #labellisation
 img6 = label(img5a)
 
-plt.imshow(img6)
-plt.show()
+#on dilate (image inversée donc on fait une érosion ici) donc le rayon du cercle représentant la note est plus grand
+tableau = calcule_aires(img6,e0+2)
+tableau = calcule_perimetres(img6,tableau)
 
-tab = calcule_aires(img6)
-tab = calcule_perimetres(img6,tab)
-
-comp = calcule_compacite(tab)
-(n1,img7) = colorie_bons(img6,comp)
+comp = calcule_compacite(tableau)
+(n1,img7) = colorie_bons(img6,comp,seuil_comp)
 
 plt.imshow(img7)
 plt.show()
@@ -212,7 +207,7 @@ v8 = bv_collee_notes(v6,n1,e0)
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0]
 v9 = liste_listes_note(v8)
 
-#on passe aux croches
+# CROCHES
 
 #on retire les notes (les croches sont rectangulaires ou ellipsoïdales)
 img8 = enleve_notes(cimg,n1)
@@ -227,8 +222,42 @@ n3 = existe_autre_croche(img8,v10,e0,nbr_croches)
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0, nbr_croches]
 n4 = liste_listes_croche(n3)
 
+#BLANCHES
+
+#on retire les portées
+img9 = enleve_portees_liste(img2,tab)
+#on "referme" les blanches
+img9 = open(img9,seline(7))
+img9 = open(img9,seline(7,90))
+#on retire les barres verticales
+img91 = close(img9,seline(3*e0))
+img9 = soustraction_img(img9,img91)
+#on grossit les notes
+img9 = erode(img9,sedisk(1))
+
+#Fond : 0, motifs : 1
+img9a = inverse_0_1(img9)
+#labellisation
+img10 = label(img9a)
+
+#Calcul de compacité
+tableau2 = calcule_aires(img10,e0)
+tableau2 = calcule_perimetres(img10,tableau2)
+comp2 = calcule_compacite(tableau2)
+(n12,img11) = colorie_bons(img10,comp2,seuil_comp2)
+
+#Listes de la forme [ord1,ord2,ab,ord_note ou 0, nbr_croches, ord_blanche ou 0]
+nb = cherche_blanche(n4,n12,e0)
+nb = liste_toutes_notes(nb)
+
+# BARRES DE MESURE
+
+n51 = barres_mesure(nb,e0)
+
+# CLEF
+
 #liste de n listes, n étant le nombre de portées
-n41 = notes_par_portees(n4,tab2)
+n5 = notes_par_portees(n51,tab2,e0)
 
 #on adapte la taille des templates à celle de l'image
 fa,sol,ut = redimensionne_img(e0,img_fa,img_sol,img_ut)
@@ -236,10 +265,18 @@ fa,sol,ut = redimensionne_img(e0,img_fa,img_sol,img_ut)
 #on découpe l'image en portées pour les étudier une à une
 list_img = decoupe_images_en_portees(tab2,img0)
 
-#on trouve le nom des notes (noires, (doubles, triples) croches)
+# NOM DES NOTES
+
+#abscisse de la note la plus à gauche
+#on pourrait le calculer pour chaque portée... utile ?
+one = ab_premiere_note(n51,img0)
+
+#on trouve le nom des notes (noires, (doubles, triples) croches, blanches)
 #la fonction cherche la clef de la portée à chaque fois
-n5 = nom_notes(n41,tab2,e0,list_img,sol,fa,ut)
+n6 = nom_notes(n5,tab2,e0,list_img,sol,fa,ut,one)
+
 print n5
+print e0
 
 #affichage
 img71 = inverse_0_1(img7)

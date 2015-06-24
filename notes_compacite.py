@@ -10,6 +10,7 @@ import numpy as np
 from matplotlib import pylab as plt
 import matplotlib.pyplot as plt2
 from math import *
+from pymorph import *
 
 from fonctions_annexes import *
 from reconnaissance_clef import *
@@ -18,35 +19,35 @@ from reconnaissance_clef import *
 #----------------------------------------------------------
 # Variables globales empiriques
 
-#Valeur minimale du critère de compacité acceptée
-seuil_comp = 0.7
 #Distance entre la note et l'extrémité de la barre verticale
 dist_note_barre = 5
 #Distance entre le symbole croche et l'extrémité de la barre verticale
 dist_croche_barre = 5
 #Aire minimale acceptée pour être une noire
-aire = 70
-#Pourcentage de remplissage du carré pour accepter une croche
+#aire = 70
+#Pourcentage de remplissage du carré pour accepter une double croche
 pc_cro = 35
 
 #----------------------------------------------------------
 # Fonctions
 
-def calcule_aires(img):
+def calcule_aires(img,ecart):
 	a = np.zeros((2,max_matrice(img)+1),np.int)
+	pi = 4*atan(1)
 	for i in range(img.shape[0]):
 		for j in range(img.shape[1]):
 			if img[i][j] != 0:
 				co = img[i][j]
 				a[0][co] = a[0][co] + 1
 	for i in range(a.shape[1]):
-		if a[0][i] < aire:
+		#l'aire pour être une note doit au moins être celle d'un cercle de rayon ecart/2
+		if a[0][i] < (pi*ecart*ecart)/4:
 			a[0][i] = 0
 	return a
 
 def calcule_perimetres(img,tab):
-	for i in range(img.shape[0]):
-		for j in range(img.shape[1]):
+	for i in range(1,img.shape[0]-1):
+		for j in range(1,img.shape[1]-1):
 			if img[i][j] != 0:
 				if img[i][j] != img[i-1][j] or img[i][j] != img[i][j-1] or img[i][j] != img[i+1][j] or img[i][j] != img[i][j+1]:
 					co = img[i][j]
@@ -63,7 +64,7 @@ def calcule_compacite(tab):
 			a[i] = (4*pi*tab[0][i])/(tab[1][i]*tab[1][i])
 	return a
 
-def colorie_bons(img,tab):
+def colorie_bons(img,tab,seuil_comp):
 	l = []
 	for i in range(img.shape[0]):
 		for j in range(img.shape[1]):
@@ -75,16 +76,16 @@ def colorie_bons(img,tab):
 	return (l,img)
 
 #Détermine si la note noire est bien à une position "logique" par rapport à la barre verticale
-def existe_noire(i,note,j,ecart,place):
+def existe_noire(i,note,j,ecart,place,coul):
 	rep = 0
 	e2 = int(round(ecart/2))
 	if abs(i - note) <= dist_note_barre:
 		rep = i
 		if place == 'b':
-			c2 = plt2.Circle(((2*j-ecart)/2,i),e2,color='red')
+			c2 = plt2.Circle(((2*j-ecart)/2,i),e2,color=coul)
 			plt2.gcf().gca().add_artist(c2)
 		else:
-			c2 = plt2.Circle(((2*j+ecart)/2,i),e2,color='red')
+			c2 = plt2.Circle(((2*j+ecart)/2,i),e2,color=coul)
 			plt2.gcf().gca().add_artist(c2)
 	return rep
 
@@ -94,8 +95,8 @@ def bv_collee_notes(bv,note,ecart):
 		for elt2 in note:
 			if (elt[2] == elt2[1]) and (elt2[0] < elt[1]) and (elt2[0] > elt[0]):
 				if len(elt) < 4:
-					bas = existe_noire(elt[1],elt2[0],elt[2],ecart,'b')
-					haut = existe_noire(elt[0],elt2[0],elt[2],ecart,'h')
+					bas = existe_noire(elt[1],elt2[0],elt[2],ecart,'b','red')
+					haut = existe_noire(elt[0],elt2[0],elt[2],ecart,'h','red')
 					if bas !=0:
 						#on réhausse un peu la note
 						elt.append(bas-2)
@@ -263,7 +264,7 @@ def liste_listes_croche(liste):
 #--------------------------------------------------------------
 #Noms des notes
 
-def notes_par_portees(liste,tab):
+def notes_par_portees(liste,tab,ecart):
 	#on crée un tableau de la taille "nombre de portées"
 	l = []
 	for i in range(len(tab[0])):
@@ -274,7 +275,7 @@ def notes_par_portees(liste,tab):
 		for j in range(len(liste)):
 			m = (liste[j][1]+liste[j][0])/2 
 			#si le milieu de la barre appartient à la portée i, on l'ajoute à la case i
-			if m >= tab[0][i] and m <= tab[4][i]:
+			if m >= tab[0][i]-2*ecart and m <= tab[4][i]+2*ecart:
 				l[i].append(liste[j])
 	return l
 
@@ -413,7 +414,7 @@ def determine_note_ut(j,tab,ecart,inter_note,x):
 #bv : liste des barres verticales
 #tab : ordonnées des portées
 #ecart : écart moyen entre les portées
-def nom_notes(bv,tab,ecart,list_img,sol,fa,ut):
+def nom_notes(bv,tab,ecart,list_img,sol,fa,ut,dist):
 	rep = ''
 	rep2 = ''
 	
@@ -423,23 +424,29 @@ def nom_notes(bv,tab,ecart,list_img,sol,fa,ut):
 	elif ecart < 20:
 		inter_note = 3
 	else:
-		inter_note = 4
+		inter_note = 5
 		
 	for i in range(len(bv)):
 	
 		#pour une portée, on détermine la clef
-		clef = cherche_bonne_clef(list_img[i],sol,fa,ut,tab)
+		clef,ab = cherche_bonne_clef(list_img[i],sol,fa,ut,tab,dist)
 	
 		for elt in bv[i]:
-			if elt[3] != 0: #si on a une note
-		
+			#si on a une note et qu'elle se trouve après la clef
+			if (elt[3] != 0 or elt[5] != 0) and elt[2] > ab:
+			
+				if elt[3] != 0:
+					n = elt[3]
+				elif elt[5] != 0:
+					n = elt[5]
+				
 				#notes
 				if clef == 'sol':
-					rep = determine_note_sol(elt[3],tab,ecart,inter_note,i)
+					rep = determine_note_sol(n,tab,ecart,inter_note,i)
 				elif clef == 'fa':
-					rep = determine_note_fa(elt[3],tab,ecart,inter_note,i)
+					rep = determine_note_fa(n,tab,ecart,inter_note,i)
 				elif clef == 'ut':
-					rep = determine_note_ut(elt[3],tab,ecart,inter_note,i)
+					rep = determine_note_ut(n,tab,ecart,inter_note,i)
 			
 				#croches
 				if elt[4] == 1:
@@ -451,9 +458,84 @@ def nom_notes(bv,tab,ecart,list_img,sol,fa,ut):
 				elif elt[4] == 3:
 					rep2 = 'triple croche '+rep
 					elt.append(rep2)
+				elif elt[5] != 0:
+					rep2 = 'blanche '+rep
+					elt.append(rep2)
 				else:
 					elt.append(rep)
 				
 				#on affiche le nom de la note sous celle-ci
 				plt2.text(elt[2]-1,elt[1]+4*ecart,rep,fontsize=7,color='g')
 	return bv
+
+#------------------------------------------------------------
+#Blanches
+
+#on retire les portées de l'image
+def enleve_portees(img,soluce):
+	for x in range(img.shape[0]):
+		for y in range(img.shape[1]):
+			if round(y*soluce[0]+soluce[1]) == x:
+				#img[x][y] = 1
+				#img[x-1][y] = 1
+				img[x+1][y] = 1 #peu précis mais imprécision des droites détectées oblige	
+	return img
+
+def enleve_portees_liste(img,liste):
+	img1 = np.zeros(img.shape,np.int)
+	img2 = np.zeros(img.shape,np.int)
+	for elt in liste:
+		for elt2 in elt:
+			img1 = enleve_portees(img,elt2)
+			img2 = union(img2,img1)
+	return img2
+	
+def cherche_blanche(bv,note,ecart):
+	for elt in bv:
+		#si on a pas encore de note
+		if elt[3] == 0:	
+			for elt2 in note:
+				if (elt[2] == elt2[1]) and (elt2[0] < elt[1]) and (elt2[0] > elt[0]):
+					if len(elt) < 6:
+						bas = existe_noire(elt[1],elt2[0],elt[2],ecart,'b','magenta')
+						haut = existe_noire(elt[0],elt2[0],elt[2],ecart,'h','magenta')
+						if bas !=0:
+							#on réhausse un peu la note
+							elt.append(bas-2)
+						elif haut != 0:
+							elt.append(haut-1)
+	return bv
+
+def liste_toutes_notes(note):
+	for elt in note:
+		if len(elt) < 6:
+			elt.append(0)
+	return note
+
+
+#----------------------------------------------------------
+# Barres de mesure
+
+def barres_mesure(bv,ecart):
+	l = []
+	for elt in bv:
+		if elt[3] == 0 and elt[5] == 0:
+			longueur = elt[1]-elt[0]
+			#une barre de mesure doit au moins faire la largeur de la portée
+			if longueur >= 4*ecart:
+				l.append(elt)
+				plt.plot([elt[2],elt[2]],[elt[1],elt[0]],'b',linewidth=3)
+		else:
+			l.append(elt)
+	return l
+
+
+
+
+
+
+
+
+
+
+
