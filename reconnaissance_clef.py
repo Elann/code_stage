@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: Utf-8 -*
 
-"""Module reconnaissance de le clef"""
+"""
+	Module reconnaissance de le clef
+"""
 
 #----------------------------------------------------------
 # Importation des librairies
@@ -20,6 +22,10 @@ from math import *
 #----------------------------------------------------------
 # Fonctions
 
+"""
+	A partir d'une image en argument
+	on la découpe en autant de partie que de portées
+"""
 def decoupe_images_en_portees(tab,img):
 	l = []
 	p = []
@@ -53,7 +59,12 @@ def decoupe_images_en_portees(tab,img):
 				img2[x][y] = img[x+h][y]
 		l.append(img2)
 	return l
-	
+
+"""
+	A partir de la liste des barres verticales
+	on détermine la plus petite abscisse d'une barre verticale
+	affublée d'une note
+"""
 def ab_premiere_note(bv,img):
 	mini = img.shape[1]
 	for elt in bv:
@@ -63,7 +74,11 @@ def ab_premiere_note(bv,img):
 			mini = elt[5]
 	return mini
 
-#on redimensionne les images de clefs pour les adapter à la partition
+"""
+	On redimensionne les images de clefs
+	pour les adapter à la partition
+	à l'aide de l'écart moyen entre les portées
+"""
 def redimensionne_img(ecart,imgf,imgs,imgu):
 	h = int(round(4*ecart))
 	h2 = int(round(7*ecart))
@@ -75,26 +90,10 @@ def redimensionne_img(ecart,imgf,imgs,imgu):
 	template_ut = cv2.resize(imgu,(bu,h))
 	return (template_fa,template_sol,template_ut)
 
-
-#les clefs détectées doivent être sur les portées
-def verifie_pertinence_clef(tab,pt,pt2):
-	j = 0
-	comp = 0
-	rep = 0
-	while j in range(len(tab[0])):
-	
-		for i in range(5):
-			if tab[i][j] <= pt2 and tab[i][j] >= pt:
-				comp = comp + 1
-			if comp == 4:
-				rep = 1
-				break
-				
-		j = j + 1
-		comp = 0
-	return rep
-
-#on cherche une unique occurence de la clef
+"""
+	On cherche une unique occurence de la clef
+	à l'aide du template en argument
+"""
 def cherche_clef(img,temp,tab,dist):
 	rep = 0
 	ab = 0
@@ -102,16 +101,18 @@ def cherche_clef(img,temp,tab,dist):
 	res = cv2.matchTemplate(img,temp,cv2.TM_CCOEFF_NORMED)
 	min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 	
-	#les clefs sont en début de partition (à bricoler)
-	if (max_loc[0] < dist): #and (verifie_pertinence_clef(tab,max_loc[1],max_loc[1]+h) == 1):
+	#les clefs sont en début de partition
+	if (max_loc[0] < dist):
 		cv2.rectangle(img, max_loc, (max_loc[0] + w, max_loc[1] + h), 0, 2)
-		#plt.imshow(img)
-		#plt.show()
 		rep = 1
 		ab = max_loc[0]
 	#on renvoie l'existence de la clef et son abscisse
 	return ab,rep
 
+"""
+	A partir des templates des trois clefs étudiées
+	on cherche celle qui est représentée dans l'image
+"""
 def cherche_bonne_clef(img,sol,fa,ut,tab,dist):
 	rep = ''
 	ab = 0
@@ -136,6 +137,7 @@ def cherche_bonne_clef(img,sol,fa,ut,tab,dist):
 		ab = ab_s
 	
 	print rep,ab
+	#on renvoie le type de la clef et son abscisse
 	return rep,ab
 	
 	

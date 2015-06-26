@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: Utf-8 -*
 
-"""Module portees_projection"""
+"""
+	Module portees_projection
+"""
 
 #----------------------------------------------------------
 # Importation des librairies
@@ -20,7 +22,10 @@ delta_portee = 2
 #----------------------------------------------------------
 # Fonctions
 
-#Teste si 5 ordonnées peuvent former une portée
+"""
+	Les cinq ordonnées en argument forment une portée
+	si la distance qui les sépare deux à deux reste constante
+"""
 def test_cinq(a,b,c,d,e):
 	if (b-a) < delta_portee+(c-b) and (c-b) < delta_portee+(d-c) and (d-c) < delta_portee+(e-d) and (e-d) < delta_portee+(b-a):
 		rep = 1
@@ -28,7 +33,9 @@ def test_cinq(a,b,c,d,e):
 		rep = 0
 	return rep
 
-#Groupe les résultats de la projection en portées
+"""
+	On groupe les résultats de la projection en portées
+"""
 def groupe_portee(l,l2):
 	if len(l) != 0:
 		try:
@@ -43,6 +50,10 @@ def groupe_portee(l,l2):
 			sys.exit(1)
 	return l2
 
+"""
+	On fait un histogramme des pixels noirs
+	de chaque ligne de l'image en argument
+"""
 def projection_lignes(img):
 	a = np.zeros(img.shape[0],np.int)
 	l = []
@@ -55,6 +66,12 @@ def projection_lignes(img):
 		l.append((a[i],i))
 	return l
 
+"""
+	Pour une liste de coordonnées donnée
+	on cherche les maxima locaux
+	ils doivent être plus grand que leur quatre plus proches voisins
+	et faire au moins 2/3 de la taille de l'image
+"""
 def maxi_locaux(a,img):
 	l = []
 	for i in range(2,len(a)-2):
@@ -65,7 +82,11 @@ def maxi_locaux(a,img):
 	#	for i in range(mod):
 	#		l.remove(min(l))
 	return l
-	
+
+"""
+	D'une liste de coordonnées
+	on ne garde que les ordonnées
+"""
 def garde_ordonnees(liste):
 	l2 = []
 	for j in range(5):
@@ -75,6 +96,10 @@ def garde_ordonnees(liste):
 		l2.append(l)
 	return l2
 
+"""
+	A partir des couples solutions représentant les droites
+	on calcule l'écart moyen entre les lignes d'une même portée
+"""
 def ecart_moyen(liste):
 	somme = 0
 	compt = 0
@@ -84,12 +109,19 @@ def ecart_moyen(liste):
 			compt = 1 + compt
 	return somme/compt	
 
-#trace les droites de pente zéro
+"""
+	On trace la droite de pente zéro
+	et d'ordonnée à l'origine donnée
+"""
 def tracer_droite_hori(soluce,img):
 	x = (0,img.shape[1])
 	y = (soluce,soluce)
 	plt.plot(x,y,color = 'blue')
 
+"""
+	Pour chaque droite de la liste
+	on la trace
+"""
 def tracer_droite_hori_liste(liste,img):
 	for elt in liste:
 		for elt2 in elt:
