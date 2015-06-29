@@ -30,12 +30,12 @@ img_ut = cv2.imread('images/clef_ut.jpg',0)
 # Variables globales empiriques
 
 #Nombre de croches
-nbr_croches = 1
+nbr_croches = 2
 
 #Valeur minimale du critère de compacité acceptée
 seuil_comp = 0.7
 #Valeur minimale du critère de compacité acceptée
-seuil_comp2 = 0.6
+seuil_comp2 = 0.55
 
 #----------------------------------------------------------
 # Programme
@@ -191,8 +191,12 @@ img5a = inverse_0_1(img5)
 #labellisation
 img6 = label(img5a)
 
-#on dilate (image inversée donc on fait une érosion ici) donc le rayon du cercle représentant la note est plus grand
-tableau = calcule_aires(img6,e0+2)
+if e0 > 7:
+	k = e0+2
+else:
+	k = e0-2
+
+tableau = calcule_aires(img6,k)
 tableau = calcule_perimetres(img6,tableau)
 
 comp = calcule_compacite(tableau)
@@ -225,10 +229,11 @@ n4 = liste_listes_croche(n3)
 #BLANCHES
 
 #on retire les portées
-img9 = enleve_portees_liste(img2,tab)
+img9 = enleve_portees_liste(img1,tab)
 #on "referme" les blanches
 img9 = open(img9,seline(7))
 img9 = open(img9,seline(7,90))
+img9 = open(img9,sedisk(3))
 #on retire les barres verticales
 img91 = close(img9,seline(3*e0))
 img9 = soustraction_img(img9,img91)
@@ -245,6 +250,9 @@ tableau2 = calcule_aires(img10,e0)
 tableau2 = calcule_perimetres(img10,tableau2)
 comp2 = calcule_compacite(tableau2)
 (n12,img11) = colorie_bons(img10,comp2,seuil_comp2)
+
+#plt.imshow(img11)
+#plt.show()
 
 #Listes de la forme [ord1,ord2,ab,ord_note ou 0, nbr_croches, ord_blanche ou 0]
 nb = cherche_blanche(n4,n12,e0)
