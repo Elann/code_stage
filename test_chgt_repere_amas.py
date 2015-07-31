@@ -19,7 +19,7 @@ from notes_amas import *
 #----------------------------------------------------------
 # Importation de l'image
 
-img0 = cv2.imread('images/partition8.jpg',0)
+img0 = cv2.imread('images/partition2.jpg',0)
 
 # si problème avec la fonction qui grise :  as_grey=True (ne garantit pas des entiers)
 
@@ -183,6 +183,9 @@ img5 = soustraction_img(img5,img61)
 #forme des listes [ordonnée1,ordonnée2,abscisse // noire en bas ?, noire en haut ? // nbr de croches // blanche en bas ?, blanche en haut ? // 'm']
 trace_verticales_liste(v6)
 v7 = existe_noire_img(img5,v6,e0,pc_note)
+
+plt.imshow(img5)
+plt.show()
 
 #cimg sert à détecter les croches, img2 sert à détecter les blanches
 v8 = existe_croche_blanche_mesure(cimg,img2,v7,e0,pc_cro,pc_blan)

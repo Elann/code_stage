@@ -441,7 +441,6 @@ def changement_de_repere_tableau(img,liste,pente):
 	teta = -atan(pente)
 	(x0,y0) = (img.shape[1]/2,img.shape[0]/2)
 	u = []
-	l = []
 	for elt in liste:
 		for elt2 in elt:
 			a = round(-x0*sin(teta)+(elt2[1]-y0)*cos(teta)+y0)

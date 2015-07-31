@@ -19,7 +19,7 @@ from reconnaissance_clef import *
 #----------------------------------------------------------
 # Importation des images
 
-img0 = cv2.imread('images/partition2.jpg')
+img0 = cv2.imread('images/partition20.jpg')
 img0 = cv2.cvtColor(img0,cv2.COLOR_BGR2GRAY)
 
 img_fa = cv2.imread('images/clef_fa2.jpg',0)
@@ -68,6 +68,9 @@ img8 = close(img1,seline(a,93))
 img9 = close(img1,seline(a,94))
 
 img = union(img2,img3,img4,img5,img6,img7,img8,img9)
+
+plt.imshow(img)
+plt.show()
 
 #Vachement long si on trace les points rouges
 l1 = trouve_noir_matrice(img)
@@ -165,7 +168,8 @@ cimg = cv2.medianBlur(img0,5)
 #on passe en binaire (fait n'importe quoi avec le threshold Gaussien)
 cimg = binary(cimg,100)
 #cimg = imgbooltoint(cimg) (effet nul, pourquoi ?)
-
+plt.imshow(cimg)
+plt.show()
 
 #on enleve les barres ~horizontales possiblement restantes
 b = 2*e0 #taille suivant les images !
@@ -201,10 +205,6 @@ tableau = calcule_perimetres(img6,tableau)
 
 comp = calcule_compacite(tableau)
 (n1,img7) = colorie_bons(img6,comp,seuil_comp)
-
-plt.imshow(img7)
-plt.show()
-
 
 #on vérifie que les barres verticales sont collées à une note
 v8 = bv_collee_notes(v6,n1,e0)
